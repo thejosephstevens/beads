@@ -41,7 +41,8 @@ func (r *RoutedResult) Close() {
 }
 
 // resolveAndGetIssueWithRouting resolves a partial ID and gets the issue.
-// Tries the local store first, then falls back to contributor auto-routing.
+// Tries the local store first, then prefix-based routing via routes.jsonl,
+// then falls back to contributor auto-routing.
 //
 // Returns a RoutedResult containing the issue, resolved ID, and the store to use.
 // The caller MUST call result.Close() when done to release any routed storage.
@@ -52,8 +53,13 @@ func resolveAndGetIssueWithRouting(ctx context.Context, localStore storage.DoltS
 		return result, nil
 	}
 
-	// If not found locally, try contributor auto-routing as fallback (GH#2345).
 	if isNotFoundErr(err) {
+		// Try prefix-based routing via routes.jsonl (cross-rig lookups).
+		if prefixResult, prefixErr := resolveViaPrefixRouting(ctx, id); prefixErr == nil {
+			return prefixResult, nil
+		}
+
+		// Fall back to contributor auto-routing (GH#2345).
 		if autoResult, autoErr := resolveViaAutoRouting(ctx, localStore, id); autoErr == nil {
 			return autoResult, nil
 		}
@@ -103,7 +109,7 @@ func resolveViaAutoRouting(ctx context.Context, localStore storage.DoltStorage, 
 }
 
 // getIssueWithRouting gets an issue by exact ID.
-// Tries the local store first, then falls back to contributor auto-routing.
+// Tries the local store first, then prefix routing, then contributor auto-routing.
 //
 // Returns a RoutedResult containing the issue and the store to use for related queries.
 // The caller MUST call result.Close() when done to release any routed storage.
@@ -119,8 +125,13 @@ func getIssueWithRouting(ctx context.Context, localStore storage.DoltStorage, id
 		}, nil
 	}
 
-	// If not found locally, try contributor auto-routing as fallback (GH#2345).
 	if isNotFoundErr(err) {
+		// Try prefix-based routing via routes.jsonl (cross-rig lookups).
+		if prefixResult, prefixErr := resolveViaPrefixRouting(ctx, id); prefixErr == nil {
+			return prefixResult, nil
+		}
+
+		// Fall back to contributor auto-routing (GH#2345).
 		if autoResult, autoErr := resolveViaAutoRouting(ctx, localStore, id); autoErr == nil {
 			return autoResult, nil
 		}
