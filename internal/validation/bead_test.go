@@ -224,6 +224,7 @@ func TestParseIssueType(t *testing.T) {
 		{"gate type", "gate", types.TypeTask, true, "invalid issue type"},
 		{"event type", "event", types.TypeTask, true, "invalid issue type"},
 		{"message type", "message", types.TypeMessage, false, ""},
+		{"nudge type", "nudge", types.TypeNudge, false, ""},
 
 		// Case sensitivity (function is case-sensitive)
 		{"uppercase bug", "BUG", types.TypeTask, true, "invalid issue type"},

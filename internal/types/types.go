@@ -528,6 +528,7 @@ const (
 	TypeDecision  IssueType = "decision"
 	TypeMessage   IssueType = "message"
 	TypeMolecule  IssueType = "molecule"  // Molecule type for swarm coordination (internal use)
+	TypeNudge     IssueType = "nudge"     // Ephemeral inter-agent communication (lightweight message)
 	TypeSpike     IssueType = "spike"     // Timeboxed investigation to reduce uncertainty
 	TypeStory     IssueType = "story"     // User story describing a feature from the user's perspective
 	TypeMilestone IssueType = "milestone" // Marks completion of a set of related issues (no work itself)
@@ -546,12 +547,12 @@ const TypeEvent IssueType = "event"
 // (message was re-promoted to built-in for inter-agent communication — GH#1347.)
 
 // IsValid checks if the issue type is a core work type.
-// Core work types (bug, feature, task, epic, chore, decision, message, spike, story, milestone)
+// Core work types (bug, feature, task, epic, chore, decision, message, nudge, spike, story, milestone)
 // and molecule type are built-in. Other types require types.custom configuration.
 func (t IssueType) IsValid() bool {
 	switch t {
 	case TypeBug, TypeFeature, TypeTask, TypeEpic, TypeChore, TypeDecision, TypeMessage, TypeMolecule,
-		TypeSpike, TypeStory, TypeMilestone:
+		TypeNudge, TypeSpike, TypeStory, TypeMilestone:
 		return true
 	}
 	return false
